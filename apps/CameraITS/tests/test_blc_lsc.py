@@ -33,13 +33,15 @@ def main():
     b_means_corner = []
 
     with its.device.ItsSession() as cam:
+        props = cam.get_camera_properties()
+        expt_range = props['android.sensor.info.exposureTimeRange']
+
         # Get AE+AWB lock first, so the auto values in the capture result are
         # populated properly.
         r = [0,0,1,1]
         ae_sen,ae_exp,awb_gains,awb_transform,_ = \
                 cam.do_3a(r,r,r,True,True,False)
-        ae_exp = ae_exp / 1000000.0
-        print "AE:", ae_sen, ae_exp
+        print "AE:", ae_sen, ae_exp / 1000000.0
         print "AWB:", awb_gains, awb_transform
 
         # Set analog gain (sensitivity) to 800
@@ -48,7 +50,8 @@ def main():
 
         # Capture range of exposures from 1/100x to 4x of AE estimate.
         exposures = [ae_exp*x/100.0 for x in [1]+range(10,401,20)]
-        print "Exposures:", exposures
+        exposures = [e for e in exposures
+                     if e >= expt_range[0] and e <= expt_range[1]]
 
         # Convert the transform back to rational.
         awb_transform_rat = [{"numerator":int(100*x),"denominator":100}
@@ -68,9 +71,9 @@ def main():
             req["android.colorCorrection.gains"] = awb_gains
             reqs.append(req)
 
-        fnames, w, h, cap_mds = cam.do_capture(reqs)
-        for i,fname in enumerate(fnames):
-            img = its.image.load_yuv420_to_rgb_image(fname, w, h)
+        caps = cam.do_capture(reqs)
+        for i,cap in enumerate(caps):
+            img = its.image.convert_capture_to_rgb_image(cap)
 
             tile_center = its.image.get_image_patch(img, 0.45, 0.45, 0.1, 0.1)
             rgb_means = its.image.compute_image_means(tile_center)
