@@ -15,6 +15,7 @@
 import its.image
 import its.device
 import its.objects
+import its.target
 import pylab
 import os.path
 import matplotlib
@@ -30,32 +31,32 @@ def main():
     """
     NAME = os.path.basename(__file__).split(".")[0]
 
-    S = 150 # Sensitivity
-    E = 10 # Exposure time, ms
-
-    reqs = [
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S*8,E  ),
-        its.objects.manual_capture_request(S*8,E  ),
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S,  E*8),
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S*8,E  ),
-        its.objects.manual_capture_request(S,  E  ),
-        its.objects.manual_capture_request(S,  E*8),
-        its.objects.manual_capture_request(S,  E  ),
-        ]
-
     r_means = []
     g_means = []
     b_means = []
 
     with its.device.ItsSession() as cam:
-        fnames, w, h, cap_mds = cam.do_capture(reqs)
-        for i, fname in enumerate(fnames):
-            img = its.image.load_yuv420_to_rgb_image(fname, w, h)
+        e, s = its.target.get_target_exposure_combos(cam)["midExposureTime"]
+        s = s / 2.0
+
+        reqs = [
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s*4,e  ),
+            its.objects.manual_capture_request(s*4,e  ),
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s,  e*4),
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s*4,e  ),
+            its.objects.manual_capture_request(s,  e  ),
+            its.objects.manual_capture_request(s,  e*4),
+            its.objects.manual_capture_request(s,  e  ),
+            ]
+
+        caps = cam.do_capture(reqs)
+        for i,cap in enumerate(caps):
+            img = its.image.convert_capture_to_rgb_image(cap)
             its.image.write_image(img, "%s_i=%02d.jpg" % (NAME, i))
             tile = its.image.get_image_patch(img, 0.45, 0.45, 0.1, 0.1)
             rgb_means = its.image.compute_image_means(tile)
