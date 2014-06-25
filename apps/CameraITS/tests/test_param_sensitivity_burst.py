@@ -27,13 +27,14 @@ def main():
     NAME = os.path.basename(__file__).split(".")[0]
 
     sensitivities = range(350, 400, 7)
-    reqs = [its.objects.manual_capture_request(s,10) for s in sensitivities]
+    reqs = [its.objects.manual_capture_request(s,10*1000*1000)
+            for s in sensitivities]
 
     with its.device.ItsSession() as cam:
-        fnames, w, h, cap_mds = cam.do_capture(reqs)
-        for i,md in enumerate(cap_mds):
+        caps = cam.do_capture(reqs)
+        for i,cap in enumerate(caps):
             s_req = sensitivities[i]
-            s_res = md["android.sensor.sensitivity"]
+            s_res = cap["metadata"]["android.sensor.sensitivity"]
             print s_req, s_res
 
 if __name__ == '__main__':
