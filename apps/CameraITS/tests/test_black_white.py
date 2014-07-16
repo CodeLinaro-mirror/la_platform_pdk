@@ -35,11 +35,15 @@ def main():
     b_means = []
 
     with its.device.ItsSession() as cam:
+        props = cam.get_camera_properties()
+        expt_range = props['android.sensor.info.exposureTimeRange']
+        sens_range = props['android.sensor.info.sensitivityRange']
+
         # Take a shot with very low ISO and exposure time. Expect it to
         # be black.
-        req = its.objects.manual_capture_request(100, 0.1)
-        fname, w, h, cap_md = cam.do_capture(req)
-        img = its.image.load_yuv420_to_rgb_image(fname, w, h)
+        req = its.objects.manual_capture_request(sens_range[0], expt_range[0])
+        cap = cam.do_capture(req)
+        img = its.image.convert_capture_to_rgb_image(cap)
         its.image.write_image(img, "%s_black.jpg" % (NAME))
         tile = its.image.get_image_patch(img, 0.45, 0.45, 0.1, 0.1)
         black_means = its.image.compute_image_means(tile)
@@ -49,10 +53,10 @@ def main():
         print "Dark pixel means:", black_means
 
         # Take a shot with very high ISO and exposure time. Expect it to
-        # be black.
-        req = its.objects.manual_capture_request(10000, 1000)
-        fname, w, h, cap_md = cam.do_capture(req)
-        img = its.image.load_yuv420_to_rgb_image(fname, w, h)
+        # be white.
+        req = its.objects.manual_capture_request(sens_range[1], expt_range[1])
+        cap = cam.do_capture(req)
+        img = its.image.convert_capture_to_rgb_image(cap)
         its.image.write_image(img, "%s_white.jpg" % (NAME))
         tile = its.image.get_image_patch(img, 0.45, 0.45, 0.1, 0.1)
         white_means = its.image.compute_image_means(tile)
