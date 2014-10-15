@@ -104,6 +104,14 @@
             android:prompt="@string/focus_mode_spinner_prompt"
             />
 
+        <Spinner
+            android:id="@+id/cac_mode_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:prompt="@string/cac_mode_spinner_prompt"
+            />
+
         <CheckBox
             android:id="@+id/use_media_codec"
             android:layout_width="fill_parent"
