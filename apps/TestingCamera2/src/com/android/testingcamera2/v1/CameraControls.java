@@ -23,7 +23,18 @@ public class CameraControls {
     private final CameraManualControls manualControls = new CameraManualControls();
     private final CameraAutoFocusControls afControls = new CameraAutoFocusControls();
 
+    private int cacMode;
+
     public CameraControls() {
+        cacMode = 0;
+    }
+
+    public int getCacMode() {
+        return cacMode;
+    }
+
+    public void setCacMode(int cacMode) {
+        this.cacMode = cacMode;
     }
 
     public CameraManualControls getManualControls() {

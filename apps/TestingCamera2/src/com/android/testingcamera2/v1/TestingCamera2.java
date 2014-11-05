@@ -91,6 +91,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
     private Button mFlushButton;
     private ToggleButton mFocusLockToggle;
     private Spinner mFocusModeSpinner;
+    private Spinner mCacModeSpinner;
     private CheckBox mUseMediaCodecCheckBox;
 
     private SeekBar mSensitivityBar;
@@ -136,6 +137,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
         mFocusLockToggle.setOnClickListener(mFocusLockToggleListener);
         mFocusModeSpinner = (Spinner) findViewById(R.id.focus_mode_spinner);
         mAutoControls.add(mFocusLockToggle);
+        mCacModeSpinner = (Spinner) findViewById(R.id.cac_mode_spinner);
 
         mRecordingToggle = (ToggleButton) findViewById(R.id.start_recording);
         mRecordingToggle.setOnClickListener(mRecordingToggleListener);
@@ -671,6 +673,48 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
              * Populate dynamic per-camera settings
              */
 
+            // Map available CAC Modes -> CAC mode spinner dropdown list of strings
+            int[] availableCacModes =
+                    characteristics.get(
+                            CameraCharacteristics.COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES);
+            String[] allCacModes = getResources().getStringArray(R.array.cac_mode_spinner_arrays);
+
+            final List<String> cacModeList = new ArrayList<>();
+            final int[] cacModePositions = new int[availableCacModes.length];
+
+            int i = 0;
+            for (int mode : availableCacModes) {
+                cacModeList.add(allCacModes[mode]);
+                cacModePositions[i++] = mode;
+            }
+
+            /*
+             * Change the CAC mode when CAC spinner's selected item changes
+             */
+            mCacModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position,
+                        long id) {
+                    int cacMode = cacModePositions[position];
+
+                    Log.i(TAG, "Change CAC mode to " + cacModeList.get(position)
+                            + " " + cacMode);
+
+                    mCameraControl.setCacMode(cacMode);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    // Do nothing
+                }
+            });
+
+            ArrayAdapter<String> cacDataAdapter = new ArrayAdapter<>(TestingCamera2.this,
+                    android.R.layout.simple_spinner_item, cacModeList);
+            cacDataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mCacModeSpinner.setAdapter(cacDataAdapter);
+
             // Map available AF Modes -> AF mode spinner dropdown list of strings
             int[] availableAfModes =
                     characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
@@ -680,7 +724,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
             final List<String> afModeList = new ArrayList<>();
             final int[] afModePositions = new int[availableAfModes.length];
 
-            int i = 0;
+            i = 0;
             for (int mode : availableAfModes) {
                 afModeList.add(allAfModes[mode]);
                 afModePositions[i++] = mode;

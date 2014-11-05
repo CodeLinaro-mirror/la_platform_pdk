@@ -549,6 +549,9 @@ public class CameraOps {
             updateCaptureRequest(builder, cameraControl.getManualControls());
             // Update the AF control metadata for capture request (if manual is not used)
             updateCaptureRequest(builder, cameraControl.getAfControls());
+            // Update cac mode
+            builder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
+                    cameraControl.getCacMode());
         }
     }
 
