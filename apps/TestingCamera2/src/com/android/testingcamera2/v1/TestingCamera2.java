@@ -93,6 +93,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
     private Button mFlushButton;
     private ToggleButton mFocusLockToggle;
     private Spinner mFocusModeSpinner;
+    private Spinner mNrModeSpinner;
     private CheckBox mUseMediaCodecCheckBox;
 
     private SeekBar mSensitivityBar;
@@ -138,6 +139,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
         mFocusLockToggle.setOnClickListener(mFocusLockToggleListener);
         mFocusModeSpinner = (Spinner) findViewById(R.id.focus_mode_spinner);
         mAutoControls.add(mFocusLockToggle);
+        mNrModeSpinner = (Spinner) findViewById(R.id.nr_mode_spinner);
 
         mRecordingToggle = (ToggleButton) findViewById(R.id.start_recording);
         mRecordingToggle.setOnClickListener(mRecordingToggleListener);
@@ -651,7 +653,8 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
                     mCameraOps.startRecording(
                             /* applicationContext */ TestingCamera2.this,
                             /* useMediaCodec */ mUseMediaCodec,
-                            /* outputFormat */ getOutputFormat());
+                            /* outputFormat */ getOutputFormat(),
+                            mCameraControl);
                 } catch (ApiFailureException e) {
                     logException("Failed to start recording", e);
                 }
@@ -709,6 +712,49 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
              * Populate dynamic per-camera settings
              */
 
+            // Map available NR Modes -> NR mode spinner dropdown list of strings
+            int[] availableNrModes =
+                    characteristics.get(
+                            CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES);
+            String[] allNrModes = getResources().getStringArray(R.array.nr_mode_spinner_arrays);
+
+            final List<String> nrModeList = new ArrayList<>();
+            final int[] nrModePositions = new int[availableNrModes.length];
+
+            int i = 0;
+            for (int mode : availableNrModes) {
+                nrModeList.add(allNrModes[mode]);
+                nrModePositions[i++] = mode;
+            }
+
+            /*
+             * Change the NR mode when NR spinner's selected item changes
+             */
+            mNrModeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position,
+                        long id) {
+                    int nrMode = nrModePositions[position];
+
+                    Log.i(TAG, "Change NR mode to " + nrModeList.get(position)
+                            + " " + nrMode);
+
+                    mCameraControl.setNrMode(nrMode);
+                    mCameraOps.updatePreview(mCameraControl);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    // Do nothing
+                }
+            });
+
+            ArrayAdapter<String> nrDataAdapter = new ArrayAdapter<>(TestingCamera2.this,
+                    android.R.layout.simple_spinner_item, nrModeList);
+            nrDataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mNrModeSpinner.setAdapter(nrDataAdapter);
+
             // Map available AF Modes -> AF mode spinner dropdown list of strings
             int[] availableAfModes =
                     characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
@@ -718,7 +764,7 @@ public class TestingCamera2 extends Activity implements SurfaceHolder.Callback {
             final List<String> afModeList = new ArrayList<>();
             final int[] afModePositions = new int[availableAfModes.length];
 
-            int i = 0;
+            i = 0;
             for (int mode : availableAfModes) {
                 afModeList.add(allAfModes[mode]);
                 afModePositions[i++] = mode;

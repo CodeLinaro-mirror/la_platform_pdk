@@ -91,6 +91,7 @@
     <string name="focus_lock_button_label">Focus Lock</string>
     <string name="focus_unlock_button_label">Focus Unlock</string>
     <string name="focus_mode_spinner_prompt">AF Mode</string>
+    <string name="nr_mode_spinner_prompt">NR Mode</string>
     <string name="recording_on_label">Recording On</string>
     <string name="recording_off_label">Recording Off</string>
     <string name="use_media_codec_label">Use MediaCodec</string>
@@ -112,5 +113,13 @@
         <item>CONTINUOUS_VIDEO</item>
         <item>CONTINUOUS_PICTURE</item>
         <item>EDOF</item>
+    </string-array>
+    <string-array name="nr_mode_spinner_arrays">
+      <!-- must be in same order as NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES* enums -->
+        <item>OFF</item>
+        <item>FAST</item>
+        <item>HIGH_QUALITY</item>
+        <item>MINIMAL</item>
+        <item>ZERO_SHUTTER_LAG</item>
     </string-array>
 </resources>

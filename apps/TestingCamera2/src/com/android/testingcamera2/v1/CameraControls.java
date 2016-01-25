@@ -23,7 +23,18 @@ public class CameraControls {
     private final CameraManualControls manualControls = new CameraManualControls();
     private final CameraAutoFocusControls afControls = new CameraAutoFocusControls();
 
+    private int nrMode;
+
     public CameraControls() {
+        nrMode = 0;
+    }
+
+    public int getNrMode() {
+        return nrMode;
+    }
+
+    public void setNrMode(int nrMode) {
+        this.nrMode = nrMode;
     }
 
     public CameraManualControls getManualControls() {

@@ -90,7 +90,7 @@ public class CameraOps {
     private static final int ENC_BIT_RATE_LOW = 2000000;
     // high encoding bitrate(bps), used by large resolution like 1080p.
     private static final int ENC_BIT_RATE_HIGH = 10000000;
-    private static final Size DEFAULT_SIZE = new Size(640, 480);
+    private static final Size DEFAULT_SIZE = new Size(1280, 720);
     private static final Size HIGH_RESOLUTION_SIZE = new Size(1920, 1080);
 
     private static final long IDLE_WAIT_MS = 2000;
@@ -419,7 +419,8 @@ public class CameraOps {
         }
     }
 
-    public void startRecording(Context applicationContext, boolean useMediaCodec, int outputFormat)
+    public void startRecording(Context applicationContext, boolean useMediaCodec, int outputFormat,
+            CameraControls cameraControl)
             throws ApiFailureException {
         minimalOpenCamera();
         Size recordingSize = getRecordingSize();
@@ -429,6 +430,10 @@ public class CameraOps {
                 mRecordingRequestBuilder =
                         mCamera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
             }
+
+            mRecordingRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE,
+                    cameraControl.getNrMode());
+
             // Setup output stream first
             mRecordingStream.configure(
                     applicationContext, recordingSize, useMediaCodec, mEncodingBitRate,
@@ -549,6 +554,9 @@ public class CameraOps {
             updateCaptureRequest(builder, cameraControl.getManualControls());
             // Update the AF control metadata for capture request (if manual is not used)
             updateCaptureRequest(builder, cameraControl.getAfControls());
+            // Update nr mode
+            builder.set(CaptureRequest.NOISE_REDUCTION_MODE,
+                    cameraControl.getNrMode());
         }
     }
 
