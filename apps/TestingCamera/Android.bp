@@ -41,7 +41,7 @@ genrule {
         ":rs_clang_headers",
     ],
     tools: [
-        "sdk_llvm-rs-cc",
+        "llvm-rs-cc",
         "soong_zip",
     ],
     out: [
@@ -49,7 +49,7 @@ genrule {
         "TestingCamera.res.zip",
     ],
     cmd: "for f in $(locations src/**/*.rscript); do " +
-        "  $(location sdk_llvm-rs-cc) -o $(genDir)/res/raw -p $(genDir)/src " +
+        "  $(location llvm-rs-cc) -o $(genDir)/res/raw -p $(genDir)/src " +
         "  -I $$(dirname $$(echo $(locations :rs_script_api) | awk '{ print $$1 }')) " +
         "  -I $$(dirname $$(echo $(locations :rs_clang_headers) | awk '{ print $$1 }')) $${f}; " +
         "done && " +
